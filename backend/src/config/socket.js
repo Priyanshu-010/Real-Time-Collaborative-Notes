@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import registerNoteSocket from "../sockets/note.socket.js"
 
 let io;
 
@@ -12,6 +13,9 @@ export const initSocket = (server) => {
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
+
+    registerNoteSocket(io, socket);
+
     socket.on("disconnect", ()=>{
       console.log("A user disconnected ", socket.id)
     })
