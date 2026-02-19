@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import User from "../models/user.js";
+import User from "../models/user.model.js";
 
 export const protect = async (req, res, next) =>{
   const authHeader = req.headers.authorization
@@ -14,6 +14,9 @@ export const protect = async (req, res, next) =>{
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY)
     req.user = await User.findById(decoded.userId)
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: User not found" });
+    }
     next();
   } catch (error) {
     console.log(error, "error in auth middleware");

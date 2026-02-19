@@ -1,4 +1,4 @@
-import Note from "../models/note.model";
+import Note from "../models/note.model.js";
 
 export const canReadNote = async (note, userId) => {
   if (note.owner.toString() === userId.toString()) return true;

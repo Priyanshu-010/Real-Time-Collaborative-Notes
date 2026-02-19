@@ -5,6 +5,7 @@ import http from "http"
 import { initSocket } from "./src/config/socket.js";
 import connectDb from "./src/config/db.js";
 import authRouter from "./src/routes/auth.route.js"
+import noteRouter from "./src/routes/note.route.js"
 
 dotenv.config()
 const app = express()
@@ -14,6 +15,7 @@ app.use(cors())
 app.use(express.json())
 
 app.use("/api/auth", authRouter)
+app.use("/api/notes", noteRouter)
 
 initSocket(server)
 

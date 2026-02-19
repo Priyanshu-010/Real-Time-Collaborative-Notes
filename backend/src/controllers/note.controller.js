@@ -1,6 +1,7 @@
 import Note from "../models/note.model.js";
+import User from "../models/user.model.js";
 import Version from "../models/version.model.js";
-import { canEditNote, canReadNote } from "../utils/permission.utils.js";
+import { canEditNote, canReadNote, isOwner } from "../utils/permission.utils.js";
 
 export const createNote = async (req, res) => {
   try {
@@ -27,18 +28,15 @@ export const createNote = async (req, res) => {
 
 export const getNotes = async (req, res) => {
   try {
-    const ownedNotes = await Note.find({ owner: req.user._id });
-
-    const collaboratedNotes = await Note.find({
-      collaborators: {
-        $elemMatch: {
-          user: req.user._id,
-          status: accepted,
+     const notes = await Note.find({
+      $or: [
+        { owner: req.user._id },
+        {
+          "collaborators.user": req.user._id,
+          "collaborators.status": "accepted",
         },
-      },
+      ],
     });
-
-    const notes = [...ownedNotes, ...collaboratedNotes];
 
     res.json(notes);
   } catch (error) {
