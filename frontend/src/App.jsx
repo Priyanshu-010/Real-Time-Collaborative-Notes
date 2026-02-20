@@ -7,11 +7,13 @@ import EditNote from "./pages/EditNote"
 import NotePage from "./pages/NotePage"
 import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute"
+import Navbar from "./components/Navbar"
 
 function App() {
 
   return (
     <div className="bg-black text-white min-h-screen">
+      <Navbar />
       <Routes>
         <Route path="/login" element={<Login />}/>
         <Route path="/register" element={<Register />}/>

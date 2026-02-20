@@ -1,8 +1,46 @@
+import { Link, useNavigate } from "react-router-dom";
 
-function NoteCard() {
+function NoteCard({ note, onDelete }) {
+  const navigate = useNavigate();
+
+  const handleEdit = (e) => {
+    e.stopPropagation();
+    navigate(`/edit/${note._id}`);
+  };
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    onDelete(note._id);
+  };
+
   return (
-    <div>NoteCard</div>
-  )
+    <Link
+      to={`/note/${note._id}`}
+      className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition"
+    >
+      <h3 className="text-lg font-semibold">{note.title}</h3>
+      <p className="text-sm text-gray-400 mt-2">
+        {note.content.slice(0, 60)}...
+      </p>
+
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={handleEdit}
+          className="bg-blue-600 px-3 py-1 rounded text-sm"
+        >
+          Edit
+        </button>
+
+        <button
+        // After making a Note use Callback func in onClick and check if it works properly if not then remove
+          onClick={handleDelete}
+          className="bg-red-600 px-3 py-1 rounded text-sm"
+        >
+          Delete
+        </button>
+      </div>
+    </Link>
+  );
 }
 
-export default NoteCard
+export default NoteCard;
