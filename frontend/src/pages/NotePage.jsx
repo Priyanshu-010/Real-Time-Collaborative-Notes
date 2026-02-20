@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import {
-  inviteCollaborator,
-  acceptInvite,
-} from "../api/note.api.js";
+import { inviteCollaborator, acceptInvite } from "../api/note.api.js";
 import { getNoteById } from "../api/note.api.js";
 import axiosInstance from "../api/axios.js";
 
@@ -33,7 +30,7 @@ const NotePage = () => {
       setNote(data);
       setLoading(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Failed to fetch note");
       setLoading(false);
     }
@@ -45,50 +42,45 @@ const NotePage = () => {
       const { data } = await axiosInstance.get(`/versions/${id}`);
       setVersions(data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Failed to fetch versions");
     }
   };
 
   useEffect(() => {
-    
-  const fetchNoteInUseEffect = async () => {
-    try {
-      const { data } = await getNoteById(id);
-      setNote(data);
-      setLoading(false);
-    } catch (error) {
-      console.log(error)
-      toast.error("Failed to fetch note");
-      setLoading(false);
-    }
-  };
+    const fetchNoteInUseEffect = async () => {
+      try {
+        const { data } = await getNoteById(id);
+        setNote(data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to fetch note");
+        setLoading(false);
+      }
+    };
     fetchNoteInUseEffect();
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="text-white text-center mt-20">
-        Loading...
-      </div>
-    );
+    return <div className="text-white text-center mt-20">Loading...</div>;
   }
 
   if (!note) {
-    return (
-      <div className="text-white text-center mt-20">
-        Note not found
-      </div>
-    );
+    return <div className="text-white text-center mt-20">Note not found</div>;
   }
 
-  const isOwner = note.owner === currentUserId;
+  const isOwner = note.owner?._id === currentUserId || note.owner === currentUserId;
 
   const collaborator = note.collaborators?.find(
-    (c) => c.user._id === currentUserId
+    (c) => (c.user._id || c.user) === currentUserId,
   );
 
   const isPending = collaborator?.status === "pending";
+  // const canEdit =
+  //   isOwner ||
+  //   (collaborator?.status === "accepted" &&
+  //     collaborator?.permission === "edit");
 
   // Invite Handler
   const handleInvite = async (e) => {
@@ -106,7 +98,7 @@ const NotePage = () => {
       setShowInvite(false);
       fetchNote();
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Failed to invite");
     }
   };
@@ -118,25 +110,27 @@ const NotePage = () => {
       toast.success("Invitation accepted");
       fetchNote();
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Failed to accept invite");
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-white p-8 max-w-4xl mx-auto">
-      
       {/* Title */}
       <h1 className="text-3xl font-bold mb-4">{note.title}</h1>
 
       {/* Accept Invitation */}
       {isPending && (
+        <div className="bg-yellow-900/30 border border-yellow-700 p-4 rounded mb-6 flex justify-between items-center">
+        <span>You have been invited to collaborate on this note.</span>
         <button
           onClick={handleAccept}
-          className="bg-green-600 px-4 py-2 rounded mb-4"
+          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-bold"
         >
           Accept Invitation
         </button>
+      </div>
       )}
 
       {/* Invite Button (Owner Only) */}
@@ -171,10 +165,7 @@ const NotePage = () => {
                 <option value="edit">Edit</option>
               </select>
 
-              <button
-                type="submit"
-                className="bg-purple-600 px-4 py-2 rounded"
-              >
+              <button type="submit" className="bg-purple-600 px-4 py-2 rounded">
                 Send Invite
               </button>
             </form>
@@ -189,14 +180,10 @@ const NotePage = () => {
 
       {/* Collaborators Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-3">
-          Collaborators
-        </h2>
+        <h2 className="text-xl font-semibold mb-3">Collaborators</h2>
 
         {note.collaborators.length === 0 && (
-          <p className="text-gray-400">
-            No collaborators yet
-          </p>
+          <p className="text-gray-400">No collaborators yet</p>
         )}
 
         {note.collaborators.map((c) => (
@@ -205,13 +192,11 @@ const NotePage = () => {
             className="bg-gray-800 p-3 rounded mb-2 flex justify-between"
           >
             <span>
-              {c.user?.email} ({c.permission})
+              {c.user?.name} ({c.permission})
             </span>
             <span
               className={
-                c.status === "accepted"
-                  ? "text-green-400"
-                  : "text-yellow-400"
+                c.status === "accepted" ? "text-green-400" : "text-yellow-400"
               }
             >
               {c.status}
@@ -235,16 +220,11 @@ const NotePage = () => {
         {showVersions && (
           <div>
             {versions.length === 0 && (
-              <p className="text-gray-400">
-                No versions available
-              </p>
+              <p className="text-gray-400">No versions available</p>
             )}
 
             {versions.map((v) => (
-              <div
-                key={v._id}
-                className="bg-gray-800 p-4 rounded mb-3"
-              >
+              <div key={v._id} className="bg-gray-800 p-4 rounded mb-3">
                 <p className="text-sm text-gray-400 mb-1">
                   Edited by: {v.editedBy?.email}
                 </p>

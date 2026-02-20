@@ -41,7 +41,7 @@ const EditNote = () => {
       navigate("/");
     } catch (error) {
       console.log("Error in handleSubmit EditNote: ", error)
-      toast.error("Failed to update note");
+      toast.error("Access Denied");
     }
   };
 
