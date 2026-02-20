@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { getNotes, deleteNote } from "../api/note.api";
-import Navbar from "../components/Navbar";
 import NoteCard from "../components/NoteCard";
-import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 function Dashboard() {

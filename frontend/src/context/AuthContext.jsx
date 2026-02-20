@@ -23,11 +23,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       setUser(data.user);
-      console.log(data.user);
       toast.success("Login successful");
       navigate("/");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      console.log("Error in login AuthProvider: ", error)
+      toast.error("Login failed");
     }
   };
 
@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }) => {
       toast.success("Registration successful");
       navigate("/");
     } catch (error) {
-      console.log("Error response:", error.response?.data);
-      toast.error(error.response?.data?.message || "Registration Failed");
+      console.log("Error response:", error);
+      toast.error("Registration Failed");
     }
   };
 

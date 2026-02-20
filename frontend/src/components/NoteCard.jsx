@@ -33,7 +33,6 @@ function NoteCard({ note, onDelete }) {
         </button>
 
         <button
-        // After making a Note use Callback func in onClick and check if it works properly if not then remove
           onClick={handleDelete}
           className="bg-red-600 px-3 py-1 rounded text-sm cursor-pointer"
         >

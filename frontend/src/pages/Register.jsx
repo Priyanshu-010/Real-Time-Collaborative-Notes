@@ -10,7 +10,6 @@ function Register() {
 
   const handleSubmit = async(e)=>{
     e.preventDefault();
-    console.log(email, password)
     register(name, email,password);
   }
   return (

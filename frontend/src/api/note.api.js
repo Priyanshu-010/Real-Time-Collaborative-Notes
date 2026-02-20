@@ -1,6 +1,5 @@
 import axiosInstance from "./axios";
 
-// Get all notes (owned + collaborated)
 export const getNotes = () => {
   return axiosInstance.get("/notes");
 };
@@ -25,9 +24,12 @@ export const deleteNote = (id) => {
   return axiosInstance.delete(`/notes/${id}`);
 };
 
+//Invite Collaborator
 export const inviteCollaborator = (id, data) =>{
   return axiosInstance.post(`/notes/${id}/invite`, data);
 }
+
+//Accept Invite
 export const acceptInvite = (id) =>{
   return axiosInstance.post(`/notes/${id}/accept`);
 }

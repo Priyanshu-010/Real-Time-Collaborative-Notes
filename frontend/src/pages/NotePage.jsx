@@ -6,7 +6,7 @@ import { inviteCollaborator, acceptInvite } from "../api/note.api.js";
 import { getNoteById } from "../api/note.api.js";
 import axiosInstance from "../api/axios.js";
 
-const SOCKET_URL = "http://localhost:3000"; // change if needed
+const SOCKET_URL = "http://localhost:3000";
 
 const NotePage = () => {
   const { id } = useParams();
@@ -30,7 +30,6 @@ const NotePage = () => {
   const token = localStorage.getItem("token");
   const currentUserId = currentUser?._id;
 
-  // Fetch Note
   const fetchNote = async () => {
     try {
       const { data } = await getNoteById(id);
@@ -38,6 +37,7 @@ const NotePage = () => {
       setContent(data.content);
       setLoading(false);
     } catch (error) {
+      console.log("Error in fetchNote NotePage: ", error)
       toast.error("Failed to fetch note");
       setLoading(false);
     }
@@ -60,6 +60,7 @@ const NotePage = () => {
         setContent(data.content);
         setLoading(false);
       } catch (error) {
+        console.log("Error in useEffect fetchNote NotePage: ", error)
         toast.error("Failed to fetch note");
         setLoading(false);
       }
@@ -67,7 +68,7 @@ const NotePage = () => {
     fetchNote();
   }, [id]);
 
-  // 🔥 SOCKET CONNECTION
+  // Socket Connection
   useEffect(() => {
     if (!note) return;
 
@@ -122,7 +123,6 @@ const NotePage = () => {
     (collaborator?.status === "accepted" &&
       collaborator?.permission === "edit");
 
-  // 🔥 Handle Content Change
   const handleContentChange = (e) => {
     const newContent = e.target.value;
     setContent(newContent);

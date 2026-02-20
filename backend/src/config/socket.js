@@ -28,7 +28,6 @@ export const initSocket = (server) => {
         return next(new Error("Authentication error: User not found"));
       }
 
-      // Attach the user object to the socket for use in events
       socket.user = user;
       next();
     } catch (err) {
