@@ -192,7 +192,7 @@ const NotePage = () => {
             className="bg-gray-800 p-3 rounded mb-2 flex justify-between"
           >
             <span>
-              {c.user?.name} ({c.permission})
+              {c.user?.email} ({c.permission})
             </span>
             <span
               className={

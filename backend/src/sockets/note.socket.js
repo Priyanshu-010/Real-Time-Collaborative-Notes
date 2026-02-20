@@ -1,31 +1,36 @@
 import Note from "../models/note.model.js";
 import { canEditNote } from "../utils/permission.utils.js";
 
-const registerNoteSocket = (io, socket) => {
+const registerNoteSocket = (socket) => {
 
-  socket.on("join-note", async ({ noteId, userId }) => {
+  const currentUser = socket.user;
+
+  socket.on("join-note", async ({ noteId }) => {
     socket.join(noteId);
-    console.log(`User ${userId} joined note ${noteId}`);
+    console.log(`User ${currentUser.name} joined note ${noteId}`);
   });
 
 
   socket.on("leave-note", ({ noteId }) => {
     socket.leave(noteId);
+    console.log(`User left room: ${noteId}`);
   });
 
 
-  socket.on("note-update", async ({ noteId, content, userId }) => {
+  socket.on("note-update", async ({ noteId, content }) => {
     try {
       const note = await Note.findById(noteId);
       if (!note) return;
 
-      if (!canEditNote(note, userId)) return;
+      if (!canEditNote(note, currentUser._id)) return;
 
       socket.to(noteId).emit("receive-update", {
         content,
-        userId
+        userId: currentUser._id
       });
 
+      note.content = content;
+      await note.save();
     } catch (error) {
       console.error("Socket update error:", error.message);
     }
