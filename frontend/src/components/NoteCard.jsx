@@ -10,6 +10,7 @@ function NoteCard({ note, onDelete }) {
   };
 
   const handleDelete = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     onDelete(note._id);
   };
@@ -17,24 +18,28 @@ function NoteCard({ note, onDelete }) {
   return (
     <Link
       to={`/note/${note._id}`}
-      className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition"
+      className="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-indigo-500/50 transition-all duration-300 group flex flex-col h-full shadow-lg"
     >
-      <h3 className="text-lg font-semibold">{note.title}</h3>
-      <p className="text-sm text-gray-400 mt-2">
-        {note.content.slice(0, 60)}...
-      </p>
+      <div className="flex-1">
+        <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors mb-4 line-clamp-1">
+          {note.title}
+        </h3>
+        <p className="text-slate-400 text-base leading-relaxed line-clamp-3">
+          {note.content}
+        </p>
+      </div>
 
-      <div className="flex gap-3 mt-4">
+      <div className="flex gap-4 mt-8 pt-6 border-t border-slate-800">
         <button
           onClick={handleEdit}
-          className="bg-blue-600 px-3 py-1 rounded text-sm cursor-pointer"
+          className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors border border-slate-700"
         >
           Edit
         </button>
 
         <button
           onClick={handleDelete}
-          className="bg-red-600 px-3 py-1 rounded text-sm cursor-pointer"
+          className="flex-1 bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-semibold text-sm transition-all border border-red-500/20"
         >
           Delete
         </button>

@@ -10,36 +10,37 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
 
 function App() {
-
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-slate-950 text-slate-200 min-h-screen selection:bg-indigo-500/30">
       <Navbar />
-      <Routes>
-        <Route path="/login" element={<Login />}/>
-        <Route path="/register" element={<Register />}/>
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        <Routes>
+          <Route path="/login" element={<Login />}/>
+          <Route path="/register" element={<Register />}/>
 
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }/>
-        <Route path="/create" element={
-          <ProtectedRoute>
-            <CreateNote />
-          </ProtectedRoute>
-        }/>
-        <Route path="/edit/:id" element={
-          <ProtectedRoute>
-            <EditNote />
-          </ProtectedRoute>
-        }/>
-        <Route path="/note/:id" element={
-          <ProtectedRoute>
-            <NotePage  />
-          </ProtectedRoute>
-        }/>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }/>
+          <Route path="/create" element={
+            <ProtectedRoute>
+              <CreateNote />
+            </ProtectedRoute>
+          }/>
+          <Route path="/edit/:id" element={
+            <ProtectedRoute>
+              <EditNote />
+            </ProtectedRoute>
+          }/>
+          <Route path="/note/:id" element={
+            <ProtectedRoute>
+              <NotePage  />
+            </ProtectedRoute>
+          }/>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
     </div>
   )
 }

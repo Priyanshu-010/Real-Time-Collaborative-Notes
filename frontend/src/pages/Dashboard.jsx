@@ -8,14 +8,14 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchNotes = async () => {
-    try {
-      const { data } = await getNotes();
-      setNotes(data);
-    } catch (error) {
-      console.log("Error in fetchNotes Dashborad: ", error);
-      toast.error("Failed to fetch notes");
-    }
-  };
+      try {
+        const { data } = await getNotes();
+        setNotes(data);
+      } catch (error) {
+        console.log(error)
+        toast.error("Failed to fetch notes");
+      }
+    };
     fetchNotes();
   }, []);
 
@@ -26,29 +26,30 @@ function Dashboard() {
         setNotes((prev) => prev.filter((note) => note._id !== id));
         toast.success("Note deleted");
       } catch (error) {
-        console.log("Error in HandleDelete DashBoard: ", error);
+        console.log(error)
         toast.error("Delete failed");
       }
   };
 
   return (
-    <>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-        </div>
-
-        {notes.length === 0 ? (
-          <p>No notes found.</p>
-        ) : (
-          <div className="grid md:grid-cols-3 gap-4">
-            {notes.map((note) => (
-              <NoteCard key={note._id} note={note} onDelete={handleDelete} />
-            ))}
-          </div>
-        )}
+    <div className="space-y-10">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold text-white tracking-tight">Dashboard</h1>
+        <p className="text-slate-400 text-lg">You have {notes.length} active notes.</p>
       </div>
-    </>
+
+      {notes.length === 0 ? (
+        <div className="bg-slate-900/50 border-2 border-dashed border-slate-800 rounded-3xl p-20 text-center">
+          <p className="text-slate-500 text-xl font-medium">No notes found yet. Start by creating one!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {notes.map((note) => (
+            <NoteCard key={note._id} note={note} onDelete={handleDelete} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
