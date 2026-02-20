@@ -29,6 +29,7 @@ const registerNoteSocket = (socket) => {
         userId: currentUser._id
       });
 
+      console.log("Received update:", content);
       note.content = content;
       await note.save();
     } catch (error) {

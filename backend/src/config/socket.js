@@ -40,7 +40,7 @@ export const initSocket = (server) => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    registerNoteSocket(io, socket);
+    registerNoteSocket(socket);
 
     socket.on("disconnect", ()=>{
       console.log("A user disconnected ", socket.id)

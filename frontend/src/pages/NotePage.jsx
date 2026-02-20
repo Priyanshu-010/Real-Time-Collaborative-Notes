@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { io } from "socket.io-client";
 import { inviteCollaborator, acceptInvite } from "../api/note.api.js";
 import { getNoteById } from "../api/note.api.js";
 import axiosInstance from "../api/axios.js";
+
+const SOCKET_URL = "http://localhost:3000"; // change if needed
 
 const NotePage = () => {
   const { id } = useParams();
@@ -11,85 +14,138 @@ const NotePage = () => {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [content, setContent] = useState("");
+  const [typingUser, setTypingUser] = useState(null);
+
   const [email, setEmail] = useState("");
   const [permission, setPermission] = useState("read");
-
   const [showInvite, setShowInvite] = useState(false);
 
   const [versions, setVersions] = useState([]);
   const [showVersions, setShowVersions] = useState(false);
 
+  const socketRef = useRef(null);
+
   const currentUser = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
   const currentUserId = currentUser?._id;
 
   // Fetch Note
-
   const fetchNote = async () => {
     try {
       const { data } = await getNoteById(id);
       setNote(data);
+      setContent(data.content);
       setLoading(false);
     } catch (error) {
-      console.log(error);
       toast.error("Failed to fetch note");
       setLoading(false);
     }
   };
 
-  // Fetch Versions
   const fetchVersions = async () => {
     try {
       const { data } = await axiosInstance.get(`/versions/${id}`);
       setVersions(data);
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("Failed to fetch versions");
     }
   };
 
   useEffect(() => {
-    const fetchNoteInUseEffect = async () => {
+    const fetchNote = async () => {
       try {
         const { data } = await getNoteById(id);
         setNote(data);
+        setContent(data.content);
         setLoading(false);
       } catch (error) {
-        console.log(error);
         toast.error("Failed to fetch note");
         setLoading(false);
       }
     };
-    fetchNoteInUseEffect();
+    fetchNote();
   }, [id]);
 
-  if (loading) {
-    return <div className="text-white text-center mt-20">Loading...</div>;
-  }
+  // 🔥 SOCKET CONNECTION
+  useEffect(() => {
+    if (!note) return;
 
-  if (!note) {
-    return <div className="text-white text-center mt-20">Note not found</div>;
-  }
+    
+    const socket = io(SOCKET_URL, {
+      auth: { token },
+    });
+    
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+    });
+    socketRef.current = socket;
 
-  const isOwner = note.owner?._id === currentUserId || note.owner === currentUserId;
+    socket.emit("join-note", { noteId: id });
+
+    socket.on("receive-update", ({ content: newContent, userId }) => {
+      if (userId !== currentUserId) {
+        setContent(newContent);
+      }
+    });
+
+    socket.on("user-typing", (userName) => {
+      setTypingUser(userName);
+    });
+
+    socket.on("user-stop-typing", () => {
+      setTypingUser(null);
+    });
+
+    return () => {
+      socket.emit("leave-note", { noteId: id });
+      socket.disconnect();
+    };
+  }, [note, currentUserId, id, token]);
+
+  if (loading)
+    return <div className="text-white mt-20 text-center">Loading...</div>;
+  if (!note)
+    return <div className="text-white mt-20 text-center">Note not found</div>;
+
+  const isOwner =
+    note.owner?._id === currentUserId || note.owner === currentUserId;
 
   const collaborator = note.collaborators?.find(
     (c) => (c.user._id || c.user) === currentUserId,
   );
 
   const isPending = collaborator?.status === "pending";
-  // const canEdit =
-  //   isOwner ||
-  //   (collaborator?.status === "accepted" &&
-  //     collaborator?.permission === "edit");
 
-  // Invite Handler
+  const canEdit =
+    isOwner ||
+    (collaborator?.status === "accepted" &&
+      collaborator?.permission === "edit");
+
+  // 🔥 Handle Content Change
+  const handleContentChange = (e) => {
+    const newContent = e.target.value;
+    setContent(newContent);
+
+    if (canEdit && socketRef.current) {
+      socketRef.current.emit("note-update", {
+        noteId: id,
+        content: newContent,
+      });
+
+      socketRef.current.emit("typing", {
+        noteId: id,
+        userName: currentUser?.name,
+      });
+
+      setTimeout(() => {
+        socketRef.current.emit("stop-typing", { noteId: id });
+      }, 1000);
+    }
+  };
+
   const handleInvite = async (e) => {
     e.preventDefault();
-
-    if (!email) {
-      return toast.error("Email is required");
-    }
-
     try {
       await inviteCollaborator(id, { email, permission });
       toast.success("Invitation sent");
@@ -97,43 +153,37 @@ const NotePage = () => {
       setPermission("read");
       setShowInvite(false);
       fetchNote();
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("Failed to invite");
     }
   };
 
-  // Accept Invite
   const handleAccept = async () => {
     try {
       await acceptInvite(id);
       toast.success("Invitation accepted");
       fetchNote();
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("Failed to accept invite");
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-white p-8 max-w-4xl mx-auto">
-      {/* Title */}
       <h1 className="text-3xl font-bold mb-4">{note.title}</h1>
 
-      {/* Accept Invitation */}
       {isPending && (
         <div className="bg-yellow-900/30 border border-yellow-700 p-4 rounded mb-6 flex justify-between items-center">
-        <span>You have been invited to collaborate on this note.</span>
-        <button
-          onClick={handleAccept}
-          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-bold"
-        >
-          Accept Invitation
-        </button>
-      </div>
+          <span>You have been invited to collaborate.</span>
+          <button
+            onClick={handleAccept}
+            className="bg-green-600 px-4 py-2 rounded"
+          >
+            Accept Invitation
+          </button>
+        </div>
       )}
 
-      {/* Invite Button (Owner Only) */}
       {isOwner && (
         <div className="mb-6">
           <button
@@ -151,13 +201,13 @@ const NotePage = () => {
               <input
                 type="email"
                 placeholder="Enter email"
-                className="w-full p-2 mb-3 rounded bg-gray-800 border border-gray-700"
+                className="w-full p-2 mb-3 rounded bg-gray-800"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
               <select
-                className="w-full p-2 mb-3 rounded bg-gray-800 border border-gray-700"
+                className="w-full p-2 mb-3 rounded bg-gray-800"
                 value={permission}
                 onChange={(e) => setPermission(e.target.value)}
               >
@@ -165,7 +215,7 @@ const NotePage = () => {
                 <option value="edit">Edit</option>
               </select>
 
-              <button type="submit" className="bg-purple-600 px-4 py-2 rounded">
+              <button className="bg-purple-600 px-4 py-2 rounded">
                 Send Invite
               </button>
             </form>
@@ -173,37 +223,21 @@ const NotePage = () => {
         </div>
       )}
 
-      {/* Content */}
-      <div className="bg-gray-900 p-6 rounded mb-8 whitespace-pre-wrap">
-        {note.content}
-      </div>
+      {/* 🔥 REAL-TIME EDITOR */}
+      <textarea
+        value={content}
+        onChange={handleContentChange}
+        disabled={!canEdit}
+        className="w-full bg-gray-900 p-6 rounded mb-2 min-h-50"
+      />
 
-      {/* Collaborators Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-3">Collaborators</h2>
+      {!canEdit && (
+        <p className="text-red-400 mb-4">You only have read permission.</p>
+      )}
 
-        {note.collaborators.length === 0 && (
-          <p className="text-gray-400">No collaborators yet</p>
-        )}
-
-        {note.collaborators.map((c) => (
-          <div
-            key={c._id}
-            className="bg-gray-800 p-3 rounded mb-2 flex justify-between"
-          >
-            <span>
-              {c.user?.email} ({c.permission})
-            </span>
-            <span
-              className={
-                c.status === "accepted" ? "text-green-400" : "text-yellow-400"
-              }
-            >
-              {c.status}
-            </span>
-          </div>
-        ))}
-      </div>
+      {typingUser && (
+        <p className="text-gray-400 mb-4">{typingUser} is typing...</p>
+      )}
 
       {/* Version History */}
       <div>
@@ -217,27 +251,20 @@ const NotePage = () => {
           {showVersions ? "Hide Versions" : "Show Version History"}
         </button>
 
-        {showVersions && (
-          <div>
-            {versions.length === 0 && (
-              <p className="text-gray-400">No versions available</p>
-            )}
-
-            {versions.map((v) => (
-              <div key={v._id} className="bg-gray-800 p-4 rounded mb-3">
-                <p className="text-sm text-gray-400 mb-1">
-                  Edited by: {v.editedBy?.email}
-                </p>
-                <p className="text-sm text-gray-400 mb-1">
-                  Version: {v.versionNumber}
-                </p>
-                <p className="text-sm text-gray-400">
-                  {new Date(v.createdAt).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        {showVersions &&
+          versions.map((v) => (
+            <div key={v._id} className="bg-gray-800 p-4 rounded mb-3">
+              <p className="text-sm text-gray-400">
+                Edited by: {v.editedBy?.email}
+              </p>
+              <p className="text-sm text-gray-400">
+                Version: {v.versionNumber}
+              </p>
+              <p className="text-sm text-gray-400">
+                {new Date(v.createdAt).toLocaleString()}
+              </p>
+            </div>
+          ))}
       </div>
     </div>
   );
