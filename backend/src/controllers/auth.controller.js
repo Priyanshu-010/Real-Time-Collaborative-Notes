@@ -1,6 +1,6 @@
 import User from "../models/user.model.js";
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 const generateToken = (userId) => {
   return jwt.sign({ userId: userId }, process.env.SECRET_KEY, {
@@ -39,16 +39,20 @@ export const register = async (req, res) => {
 
     res
       .status(201)
-      .json({ _id: user._id, name: user.name, email: user.email, token });
+      .json({
+        message: "Registration Successfully",
+        user: { _id: user._id, name: user.name, email: user.email },
+        token,
+      });
   } catch (error) {
     res.status(500).json({ message: "Internal Server error" });
     console.log("Error in register controller: ", error);
   }
 };
 
-export const login = async (req, res)=>{
+export const login = async (req, res) => {
   try {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -59,13 +63,13 @@ export const login = async (req, res)=>{
         .json({ message: "Password must be at least 6 characters" });
     }
 
-    const user = await User.findOne({email})
+    const user = await User.findOne({ email });
 
-    if(!user){
+    if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid Credentials" });
@@ -73,11 +77,13 @@ export const login = async (req, res)=>{
 
     const token = generateToken(user._id);
 
-    res
-      .status(200)
-      .json({ _id: user._id, name: user.name, email: user.email, token });
+    res.status(200).json({
+      message: "Login Successfully",
+      user: { _id: user._id, name: user.name, email: user.email },
+      token,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
-    console.log("Error in login controller: ", error)
+    console.log("Error in login controller: ", error);
   }
-}
+};

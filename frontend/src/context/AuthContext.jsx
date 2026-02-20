@@ -1,54 +1,59 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { loginUser, registerUser } from "../api/auth.api.js";
+import axiosInstance from "../api/axios.js";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      setUser({ token });
-    }
-  }, []);
 
   const login = async (email, password) => {
     try {
-      const { data } = await loginUser({ email, password });
+      const { data } = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+      });
+
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       setUser(data.user);
-
+      console.log(data.user);
       toast.success("Login successful");
       navigate("/");
     } catch (error) {
-      console.log("Error in login authContext: ", error);
-      toast.error("Login Failed");
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
 
   const register = async (name, email, password) => {
     try {
-      const { data } = await registerUser({ name, email, password });
+      const { data } = await axiosInstance.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       setUser(data.user);
 
       toast.success("Registration successful");
       navigate("/");
     } catch (error) {
-      console.log("Error in register authContext: ", error);
-      toast.error("Registration Failed");
+      console.log("Error response:", error.response?.data);
+      toast.error(error.response?.data?.message || "Registration Failed");
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     navigate("/login");
   };
@@ -57,6 +62,6 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export default AuthContext;
