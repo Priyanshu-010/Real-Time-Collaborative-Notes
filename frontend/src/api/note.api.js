@@ -24,3 +24,10 @@ export const updateNote = (id, data) => {
 export const deleteNote = (id) => {
   return axiosInstance.delete(`/notes/${id}`);
 };
+
+export const inviteCollaborator = (id, data) =>{
+  return axiosInstance.post(`/notes/${id}/invite`, data);
+}
+export const acceptInvite = (id) =>{
+  return axiosInstance.post(`/notes/${id}/accept`);
+}
