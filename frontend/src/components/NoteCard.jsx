@@ -4,6 +4,7 @@ function NoteCard({ note, onDelete }) {
   const navigate = useNavigate();
 
   const handleEdit = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     navigate(`/edit/${note._id}`);
   };
@@ -26,7 +27,7 @@ function NoteCard({ note, onDelete }) {
       <div className="flex gap-3 mt-4">
         <button
           onClick={handleEdit}
-          className="bg-blue-600 px-3 py-1 rounded text-sm"
+          className="bg-blue-600 px-3 py-1 rounded text-sm cursor-pointer"
         >
           Edit
         </button>
@@ -34,7 +35,7 @@ function NoteCard({ note, onDelete }) {
         <button
         // After making a Note use Callback func in onClick and check if it works properly if not then remove
           onClick={handleDelete}
-          className="bg-red-600 px-3 py-1 rounded text-sm"
+          className="bg-red-600 px-3 py-1 rounded text-sm cursor-pointer"
         >
           Delete
         </button>
