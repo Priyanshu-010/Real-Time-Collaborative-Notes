@@ -9,7 +9,7 @@ import {
 } from "../api/note.api.js";
 import axiosInstance from "../api/axios.js";
 
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = "https://real-time-collaborative-notes-3p97.onrender.com";
 
 const NotePage = () => {
   const { id } = useParams();

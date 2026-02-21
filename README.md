@@ -54,7 +54,9 @@
 
 ## 🌐 Live Demo
 
-> 🚀 **[View Live Demo](YOUR_VERCEL_LINK_HERE)** > *Note: Backend is hosted on Render and may take 30-60 seconds to "wake up" on the first request.*
+> 🚀 [SyncNote Live]()  
+> backend (https://real-time-collaborative-notes-3p97.onrender.com)
+> *(Hosted using Render / Vercel — may take a few seconds to wake up if idle)*
 
 ### 🔑 Test Credentials
 If you'd like to skip registration, use these accounts:
