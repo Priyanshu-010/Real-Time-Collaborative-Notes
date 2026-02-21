@@ -54,7 +54,7 @@
 
 ## 🌐 Live Demo
 
-> 🚀 [SyncNote Live]()  
+> 🚀 [SyncNote Live](https://real-time-collaborative-notes.vercel.app/)  
 > backend (https://real-time-collaborative-notes-3p97.onrender.com)
 > *(Hosted using Render / Vercel — may take a few seconds to wake up if idle)*
 
