@@ -246,7 +246,6 @@ const NotePage = () => {
                         </p>
                       </div>
 
-                      {/* Added: Preview of what was updated */}
                       <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed bg-slate-900/50 p-2 rounded-lg border border-slate-800/50">
                         "{v.content}"
                       </p>
