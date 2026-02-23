@@ -67,7 +67,7 @@ const NotePage = () => {
 
   useEffect(() => {
     if (!note) return;
-    const socket = io(SOCKET_URL, { auth: { token } });
+    const socket = io(SOCKET_URL? SOCKET_URL: "http://localhost:3000", { auth: { token } });
     socketRef.current = socket;
     socket.emit("join-note", { noteId: id });
     socket.on("receive-update", ({ content: newContent, userId }) => {
@@ -172,7 +172,7 @@ const NotePage = () => {
       </div>
 
       <div className="lg:col-span-4 space-y-6">
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6">
+        {isOwner && <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6">
           <button
             onClick={() => setShowInvite(!showInvite)}
             className="w-full bg-indigo-600 py-3 rounded-xl font-bold text-white shadow-lg"
@@ -264,7 +264,7 @@ const NotePage = () => {
               </div>
             </div>
           )}
-        </div>
+        </div>}
       </div>
     </div>
   );
